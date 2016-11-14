@@ -3,13 +3,12 @@ let superagent = require("superagent");
 let cheerio = require("cheerio");
 let VideoModel = require('./model');
 
-
 const baseUrl = 'http://javl10.com'
 
 mongoose.connect('mongodb://localhost/jav');
 
 function start(baseUrl) {
-  console.log(enterUrl(baseUrl));
+  enterUrl(baseUrl);
 }
 
 function analyzeHtml(url, html) {
@@ -18,13 +17,13 @@ function analyzeHtml(url, html) {
     let videoInfo = getVideoInfo(html, url.split('/?v=')[1]);
     VideoModel.findOne({code: videoInfo.code}, (error, video) => {
       if (error) {
-        console.log(error);
+        //console.log(error);
       }
       if(!video) {
         console.log(videoInfo.video_id)
         VideoModel.create(videoInfo, error => {
           if(error) {
-            console.log(error);
+            //console.log(error);
           }
           else {
             console.log('save' + videoInfo.code + ' ' + videoInfo.title)
@@ -60,8 +59,8 @@ let getAllHref = function(html){
 
 function enterUrl(url) {
   console.log('enter url', url);
-  superagent.get(url)
-          .set("Cookie", "over18=18")
+  let res = superagent.get(url).set("Cookie", "over18=18")
+          // .timeout(3000)
           .end(function(err,res) {
             if(err) {
               console.log(err)

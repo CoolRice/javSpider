@@ -1,21 +1,22 @@
 let mongoose = require('mongoose');
 
 var videoSchema = mongoose.Schema({
-  title: String,
-  video_id: String,
-  video_date: String,
+  from: String,
+  name: String,
+  code: String,
+  date: String,
   length: String,
-  director: String,
-  director_id: String,
-  maker: String,
-  label: String,
-  cast: [String],
-  cast_id: [String],
+  director: {name: String, key: String},
+  maker: {name: String, key: String},
+  publisher: {name: String, key: String},
+  series: {name: String, key: String},
+  genres: [{name: String, key: String}],
+  stars: [{name: String, key: String}],
   score: String,
-  jacket_img: String,
-  genres: [String],
-  previewthumbs: [String],
-  code: String
+  cover_url: String,
+  genres: [{name: String, key: String}],
+  previews: [{big: String, small: String}],
+  magnet_links: [{name: String, size: String, share_time: String, link: String}]
 });
 let VideoModel = mongoose.model('videos', videoSchema);
 
