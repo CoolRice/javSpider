@@ -1,6 +1,7 @@
 let mongoose = require('mongoose');
 
 var videoSchema = mongoose.Schema({
+  save_time: Date,
   from: String,
   name: String,
   code: String,

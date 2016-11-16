@@ -14,7 +14,7 @@ var videoPageRe = new RegExp(baseUrl + "/[A-Z]+-[0-9]+");
 
 var c = new Crawler({
     maxConnections : 10,
-    // skipDuplicates: true,
+    skipDuplicates: true,
     // This will be called for each crawled page
     callback : function (error, result, $) {
         // $ is Cheerio by default
@@ -32,7 +32,7 @@ var c = new Crawler({
 });
 
 // Queue just one URL, with default callback
-c.queue(baseUrl);
+c.queue(baseUrl + '/ipz-002');
 
 function getVideoInfo($, from) {
   console.log(from + '-----------------------------------------begin')
@@ -135,10 +135,7 @@ function getVideoInfo($, from) {
   });
   video.previews = previews;
   const callback = (video) => {
-    console.log(video)
-    global.count = global.count + 1;
     saveVideo(video);
-    console.log(from + '-----------------------------------------end, this is the ' + global.count);
   }
   // magnet link
   getItemMagnet($, video, callback)
@@ -206,6 +203,7 @@ function getItemMagnet($, video, done) {
 }
 
 function saveVideo(videoInfo) {
+  videoInfo.save_time = new Date();
   VideoModel.findOne({code: videoInfo.code}, (error, video) => {
     if (error) {
       //console.log(error);
@@ -216,7 +214,8 @@ function saveVideo(videoInfo) {
           //console.log(error);
         }
         else {
-          console.log('save' + videoInfo.code + ' ' + videoInfo.name)
+          global.count = global.count + 1;
+          console.log(videoInfo.from + '-----------------------------------------end, this is the ' + global.count);
         }
       });
     }
