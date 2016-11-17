@@ -15,6 +15,7 @@
     "lodash": "^4.16.6",
     "mongoose": "^4.6.5",
     "superagent": "^2.2.0",
+    "sync-request": "^3.0.1",
     "thunkify": "^2.1.2"
   }
 }
