@@ -35,22 +35,17 @@ var c = new Crawler({
     }
 });
 
-function start(baseUrl, code) {
-  VideoModel.find({},(error,res) => {
-    if(error || res.length === 0) {
-      if(code) {
-        c.queue(baseUrl + '/' + code);
-      }
-      else {
-        c.queue(baseUrl);
-      }
+function start(baseUrl) {
+  VideoModel.count({}, (err, res) => {
+    console.log(`total count ${res}.`)
+    if(res && res > 0) {
+      VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
+        console.log(`latest saved movie is ${res.code}`);
+        c.queue(baseUrl + '/' + res.code.trim());
+      })
     }
-    else {
-      console.log('total video :' + res.length)
-      c.queue(baseUrl + '/' + res[res.length-1].code.trim());
-    }
-
-  });
+  })
+  c.queue(baseUrl);
 }
 start(baseUrl);
 // Queue just one URL, with default callback
