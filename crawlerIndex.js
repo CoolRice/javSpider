@@ -39,6 +39,7 @@ function start(baseUrl) {
   VideoModel.count({}, (err, res) => {
     console.log(`total count ${res}.`)
     if(res && res > 0) {
+      global.count = res;
       VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
         console.log(`latest saved movie is ${res.code}`);
         c.queue(baseUrl + '/' + res.code.trim());
