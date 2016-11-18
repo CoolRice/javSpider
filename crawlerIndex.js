@@ -215,12 +215,14 @@ function getItemMagnet($, video, done) {
         // 将磁链单独存入
         const magnet_links = [];
         $body('tr').each((index, row) => {
+          if ($(row).children().eq(0).children().attr('href')) {
             magnet_links.push({
-              name: $(row).children().eq(0).text().trim(),
-              size: $(row).children().eq(1).text().trim(),
-              share_time: $(row).children().eq(2).text().trim(),
-              link: $(row).children().eq(0).children().attr('href').trim()
+              name: $(row).children().eq(0).text(),
+              size: $(row).children().eq(1).text(),
+              share_time: $(row).children().eq(2).text(),
+              link: $(row).children().eq(0).children().attr('href')
             });
+          }
         })
         video.magnet_links = magnet_links;
       }
