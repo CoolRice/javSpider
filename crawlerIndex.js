@@ -201,7 +201,7 @@ function getMetaInfo($) {
 function getItemMagnet($, video, done) {
   const meta = getMetaInfo($);
   const url = baseUrl + '/ajax/uncledatoolsbyajax.php?gid=' + meta.gid + '&lang=' + meta.lang + '&img=' + meta.img + '&uc=' + meta.uc + '&floor=' + Math.floor(Math.random() * 1e3 + 1);
-  try{
+
     var res = request('GET', url, {
       'headers': {
         'Referer': 'http://www.javbus.com',
@@ -210,23 +210,27 @@ function getItemMagnet($, video, done) {
     });
     const body = (res && res.getBody()) || '';
     if(body.indexOf('暫時沒有磁力連結') === -1) {
-      let $body = $.load(res.getBody());
-      // 将磁链单独存入
-      const magnet_links = [];
-      $body('tr').each((index, row) => {
-          magnet_links.push({
-            name: $(row).children().eq(0).text().trim(),
-            size: $(row).children().eq(1).text().trim(),
-            share_time: $(row).children().eq(2).text().trim(),
-            link: $(row).children().eq(0).children().attr('href').trim()
-          });
-      })
-      video.magnet_links = magnet_links;
+      try{
+        let $body = $.load(res.getBody());
+        // 将磁链单独存入
+        const magnet_links = [];
+        $body('tr').each((index, row) => {
+            magnet_links.push({
+              name: $(row).children().eq(0).text().trim(),
+              size: $(row).children().eq(1).text().trim(),
+              share_time: $(row).children().eq(2).text().trim(),
+              link: $(row).children().eq(0).children().attr('href')
+            });
+        })
+        video.magnet_links = magnet_links;
+      }
+      catch(e) {
+        console.log(video.code)
+        console.log(e)
+        console.log(body)
+      }
     }
-  }
-  catch(e) {
-    console.log(e)
-  }
+
   done(video)
 }
 
