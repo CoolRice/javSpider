@@ -63,101 +63,107 @@ function getVideoInfo($, from) {
   let video = {};
   let genresDomIndex = 0;
   let starsDomIndex = 0;
-
-  video.from = from.trim();
-  video.name = $('h3').text().trim()
-  $('.info').children().each((index, item) => {
-    if($(item).text().indexOf(':') > 0) {
-      const key = $(item).text().split(':')[0];
-      const value = $(item).text().split(':')[1];
-      if(key === '識別碼') {
-        video.code = value.trim()
+  try{
+    video.from = from.trim();
+    video.name = $('h3').text().trim()
+    $('.info').children().each((index, item) => {
+      if($(item).text().indexOf(':') > 0) {
+        const key = $(item).text().split(':')[0];
+        const value = $(item).text().split(':')[1];
+        if(key === '識別碼') {
+          video.code = value.trim()
+        }
+        if(key === '發行日期') {
+          video.date = value.trim()
+        }
+        if(key === '長度') {
+          video.length = value.trim()
+        }
+        if(key === '導演') {
+          video.director = {
+            name: value.trim()
+          };
+        }
+        if(key === '製作商') {
+          video.maker = {
+            name: value.trim()
+          };
+        }
+        if(key === '發行商') {
+          video.publisher = {
+            name: value.trim()
+          };
+        }
+        if(key === '系列') {
+          video.series = {
+            name: value.trim()
+          };
+        }
+        if(key === '類別') {
+          genresDomIndex = index
+        }
+        if(key === '演員') {
+          starsDomIndex = index
+        }
       }
-      if(key === '發行日期') {
-        video.date = value.trim()
-      }
-      if(key === '長度') {
-        video.length = value.trim()
-      }
-      if(key === '導演') {
-        video.director = {
-          name: value.trim()
-        };
-      }
-      if(key === '製作商') {
-        video.maker = {
-          name: value.trim()
-        };
-      }
-      if(key === '發行商') {
-        video.publisher = {
-          name: value.trim()
-        };
-      }
-      if(key === '系列') {
-        video.series = {
-          name: value.trim()
-        };
-      }
-      if(key === '類別') {
-        genresDomIndex = index
-      }
-      if(key === '演員') {
-        starsDomIndex = index
-      }
-    }
-    if(genresDomIndex && index === genresDomIndex + 1) {
-      let genres = [];
-      $(item).children().each((index, genre) => {
-        let href = $(genre).children().attr('href');
-        genres.push({
-          name: $(genre).text().trim(),
-          key: href.split('/')[href.split('/').length - 1].trim(),
+      if(genresDomIndex && index === genresDomIndex + 1) {
+        let genres = [];
+        $(item).children().each((index, genre) => {
+          let href = $(genre).children().attr('href');
+          genres.push({
+            name: $(genre).text().trim(),
+            key: href.split('/')[href.split('/').length - 1].trim(),
+          });
         });
-      });
-      video.genres = genres;
-    }
-    if(starsDomIndex && index === starsDomIndex + 2) {
-      let stars = [];
-      $(item).children().each((index, star) => {
-        let href = $(star).children().attr('href');
-        stars.push({
-          name: $(star).text().trim(),
-          key: href.split('/')[href.split('/').length - 1].trim(),
+        video.genres = genres;
+      }
+      if(starsDomIndex && index === starsDomIndex + 2) {
+        let stars = [];
+        $(item).children().each((index, star) => {
+          let href = $(star).children().attr('href');
+          stars.push({
+            name: $(star).text().trim(),
+            key: href.split('/')[href.split('/').length - 1].trim(),
+          });
         });
-      });
-      video.stars = stars;
-    }
+        video.stars = stars;
+      }
 
-  })
-  const allUrls = getAllHref($('.info').html())
-  allUrls.forEach(url => {
-    if(url.indexOf('director') > 0) {
-      video.director.key = url.split('/')[url.split('/').length-1].trim();
-    }
-    if(url.indexOf('studio') > 0) {
-      video.maker.key = url.split('/')[url.split('/').length-1].trim();
-    }
-    if(url.indexOf('label') > 0) {
-      video.publisher.key = url.split('/')[url.split('/').length-1].trim();
-    }
-    if(url.indexOf('series') > 0) {
-      video.series.key = url.split('/')[url.split('/').length-1].trim();
-    }
-  });
-  // cover
-  video.cover_url = $('.bigImage').children().attr('src').trim();
-
-
-  // preview
-  const previews = [];
-  $('#sample-waterfall').children().each((index, item) => {
-    previews.push({
-      big: $(item).attr('href'),
-      small: $(item).children().children().attr('src')
+    })
+    const allUrls = getAllHref($('.info').html())
+    allUrls.forEach(url => {
+      if(url.indexOf('director') > 0) {
+        video.director.key = url.split('/')[url.split('/').length-1].trim();
+      }
+      if(url.indexOf('studio') > 0) {
+        video.maker.key = url.split('/')[url.split('/').length-1].trim();
+      }
+      if(url.indexOf('label') > 0) {
+        video.publisher.key = url.split('/')[url.split('/').length-1].trim();
+      }
+      if(url.indexOf('series') > 0) {
+        video.series.key = url.split('/')[url.split('/').length-1].trim();
+      }
     });
-  });
-  video.previews = previews;
+    // cover
+    video.cover_url = $('.bigImage').children().attr('src');
+
+
+    // preview
+    const previews = [];
+    $('#sample-waterfall').children().each((index, item) => {
+      previews.push({
+        big: $(item).attr('href'),
+        small: $(item).children().children().attr('src')
+      });
+    });
+    video.previews = previews;
+  }
+  catch(e) {
+    console.log(e)
+  }
+
+
   const callback = (video) => {
     saveVideo(video);
   }
@@ -219,12 +225,9 @@ function getItemMagnet($, video, done) {
     }
   }
   catch(e) {
-
+    console.log(e)
   }
-
   done(video)
-
-  // console.log(res.getBody());
 }
 
 function saveVideo(videoInfo) {
