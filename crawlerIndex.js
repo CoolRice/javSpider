@@ -227,7 +227,7 @@ function getItemMagnet($, video, done) {
       catch(e) {
         console.log(video.code)
         console.log(e)
-        console.log(body)
+        console.log(body.toString())
       }
     }
 
