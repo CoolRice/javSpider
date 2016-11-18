@@ -219,7 +219,7 @@ function getItemMagnet($, video, done) {
               name: $(row).children().eq(0).text().trim(),
               size: $(row).children().eq(1).text().trim(),
               share_time: $(row).children().eq(2).text().trim(),
-              link: $(row).children().eq(0).children().attr('href')
+              link: $(row).children().eq(0).children().attr('href').trim()
             });
         })
         video.magnet_links = magnet_links;
