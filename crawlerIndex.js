@@ -9,6 +9,7 @@ const baseUrl = 'https://www.javbus.com';
 
 let conn = mongoose.connect('mongodb://localhost/jav1');
 
+var params = process.argv.splice(2);
 
 var videoPageRe = new RegExp(baseUrl + "/[A-Z]+-[0-9]+");
 
@@ -38,17 +39,22 @@ var c = new Crawler({
 function start(baseUrl) {
   VideoModel.count({}, (err, res) => {
     console.log(`total count ${res}.`)
-    if(res && res > 0) {
-      global.count = res;
-      VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
-        console.log(`latest saved movie is ${res.code}`);
-        c.queue(baseUrl + '/' + res.code.trim());
-      })
+    global.count = res;
+    if(params && params[0]) {
+      c.queue(`${baseUrl}/${params[0]}`);
+    }
+    else {
+      if(res && res > 0) {
+        VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
+          console.log(`latest saved movie is ${res.code}`);
+          c.queue(baseUrl + '/' + res.code.trim());
+        })
+      }
     }
   })
   c.queue(baseUrl);
 }
-start(baseUrl);
+start(baseUrl)
 // Queue just one URL, with default callback
 // c.queue(baseUrl + '/ipz-100');
 
@@ -58,46 +64,46 @@ function getVideoInfo($, from) {
   let genresDomIndex = 0;
   let starsDomIndex = 0;
 
-  video.from = from;
-  video.name = $('h3').text()
+  video.from = from.trim();
+  video.name = $('h3').text().trim()
   $('.info').children().each((index, item) => {
     if($(item).text().indexOf(':') > 0) {
       const key = $(item).text().split(':')[0];
       const value = $(item).text().split(':')[1];
       if(key === '識別碼') {
-        video.code = value;
+        video.code = value.trim()
       }
       if(key === '發行日期') {
-        video.date = value;
+        video.date = value.trim()
       }
       if(key === '長度') {
-        video.length = value;
+        video.length = value.trim()
       }
       if(key === '導演') {
         video.director = {
-          name: value
+          name: value.trim()
         };
       }
       if(key === '製作商') {
         video.maker = {
-          name: value
+          name: value.trim()
         };
       }
       if(key === '發行商') {
         video.publisher = {
-          name: value
+          name: value.trim()
         };
       }
       if(key === '系列') {
         video.series = {
-          name: value
+          name: value.trim()
         };
       }
       if(key === '類別') {
-        genresDomIndex = index;
+        genresDomIndex = index
       }
       if(key === '演員') {
-        starsDomIndex = index;
+        starsDomIndex = index
       }
     }
     if(genresDomIndex && index === genresDomIndex + 1) {
@@ -105,8 +111,8 @@ function getVideoInfo($, from) {
       $(item).children().each((index, genre) => {
         let href = $(genre).children().attr('href');
         genres.push({
-          name: $(genre).text(),
-          key: href.split('/')[href.split('/').length - 1],
+          name: $(genre).text().trim(),
+          key: href.split('/')[href.split('/').length - 1].trim(),
         });
       });
       video.genres = genres;
@@ -117,7 +123,7 @@ function getVideoInfo($, from) {
         let href = $(star).children().attr('href');
         stars.push({
           name: $(star).text().trim(),
-          key: href.split('/')[href.split('/').length - 1],
+          key: href.split('/')[href.split('/').length - 1].trim(),
         });
       });
       video.stars = stars;
@@ -127,20 +133,20 @@ function getVideoInfo($, from) {
   const allUrls = getAllHref($('.info').html())
   allUrls.forEach(url => {
     if(url.indexOf('director') > 0) {
-      video.director.key = url.split('/')[url.split('/').length-1]
+      video.director.key = url.split('/')[url.split('/').length-1].trim();
     }
     if(url.indexOf('studio') > 0) {
-      video.maker.key = url.split('/')[url.split('/').length-1]
+      video.maker.key = url.split('/')[url.split('/').length-1].trim();
     }
     if(url.indexOf('label') > 0) {
-      video.publisher.key = url.split('/')[url.split('/').length-1]
+      video.publisher.key = url.split('/')[url.split('/').length-1].trim();
     }
     if(url.indexOf('series') > 0) {
-      video.series.key = url.split('/')[url.split('/').length-1]
+      video.series.key = url.split('/')[url.split('/').length-1].trim();
     }
   });
   // cover
-  video.cover_url = $('.bigImage').children().attr('src')
+  video.cover_url = $('.bigImage').children().attr('src').trim();
 
 
   // preview
@@ -206,7 +212,7 @@ function getItemMagnet($, video, done) {
             name: $(row).children().eq(0).text().trim(),
             size: $(row).children().eq(1).text().trim(),
             share_time: $(row).children().eq(2).text().trim(),
-            link: $(row).children().eq(0).children().attr('href')
+            link: $(row).children().eq(0).children().attr('href').trim()
           });
       })
       video.magnet_links = magnet_links;
@@ -219,37 +225,6 @@ function getItemMagnet($, video, done) {
   done(video)
 
   // console.log(res.getBody());
-
-
-  // request = request.defaults({
-  //   headers: {
-  //     'Referer': 'http://www.javbus.com',
-  //     'Cookie': 'existmag=all'
-  //   }
-  // });
-  // console.log('request magnet_links');
-  // // request.cookie('existmag=all');
-  // request.get(url,
-  //   function(err, res, body) {
-  //     if (err) {
-  //       console.log(video.code + ': get mag error')
-  //     }
-  //     else {
-  //       let $body = $.load(body);
-  //       // 将磁链单独存入
-  //       const magnet_links = [];
-  //       $body('tr').each((index, row) => {
-  //           magnet_links.push({
-  //             name: $(row).children().eq(0).text().trim(),
-  //             size: $(row).children().eq(1).text().trim(),
-  //             share_time: $(row).children().eq(2).text().trim(),
-  //             link: $(row).children().eq(0).children().attr('href')
-  //           });
-  //       })
-  //       video.magnet_links = magnet_links;
-  //     }
-  //     done(video)
-  //   });
 }
 
 function saveVideo(videoInfo) {
