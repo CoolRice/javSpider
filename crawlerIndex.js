@@ -25,13 +25,13 @@ var c = new Crawler({
     callback : function (error, result, $) {
         // $ is Cheerio by default
         //a lean implementation of core jQuery designed specifically for the server
-        $('a').each(function(index, a) {
-            var toQueueUrl = $(a).attr('href');
-            if(toQueueUrl && toQueueUrl.match(videoPageRe)){
-              // c.queue(toQueueUrl);
-            }
-
-        });
+        // $('a').each(function(index, a) {
+        //     var toQueueUrl = $(a).attr('href');
+        //     if(toQueueUrl && toQueueUrl.match(videoPageRe)){
+        //       // c.queue(toQueueUrl);
+        //     }
+        //
+        // });
         const from = _.get(result, 'request.response.uri');
         if (from && from.match(videoPageRe)) {
           getVideoInfo($, from);
@@ -52,22 +52,22 @@ var c = new Crawler({
 });
 
 function start(baseUrl) {
-  VideoModel.count({}, (err, res) => {
-    console.log(`total count ${res}.`)
-    global.count = res;
-    if(params && params[0]) {
-      c.queue(`${baseUrl}/${params[0]}`);
-    }
-    else {
-      if(res && res > 0) {
-        VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
-          console.log(`latest saved movie is ${res.code}`);
-          c.queue(baseUrl + '/' + res.code.trim());
-        })
-      }
-    }
-  })
-  // c.queue(baseUrl);
+  // VideoModel.count({}, (err, res) => {
+  //   console.log(`total count ${res}.`)
+  //   global.count = res;
+  //   if(params && params[0]) {
+  //     c.queue(`${baseUrl}/${params[0]}`);
+  //   }
+  //   else {
+  //     if(res && res > 0) {
+  //       VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
+  //         console.log(`latest saved movie is ${res.code}`);
+  //         c.queue(baseUrl + '/' + res.code.trim());
+  //       })
+  //     }
+  //   }
+  // })
+  c.queue(baseUrl);
 }
 start(baseUrl)
 // Queue just one URL, with default callback
