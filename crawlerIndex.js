@@ -14,7 +14,7 @@ var params = process.argv.splice(2);
 var videoPageRe = new RegExp(baseUrl + "/[A-Z]+-[0-9]+");
 
 var c = new Crawler({
-    maxConnections : 5,
+    maxConnections : 10,
     skipDuplicates: true,
     headers: {
       'Referer': 'http://www.javbus.com',
@@ -26,13 +26,22 @@ var c = new Crawler({
         //a lean implementation of core jQuery designed specifically for the server
         $('a').each(function(index, a) {
             var toQueueUrl = $(a).attr('href');
-            if(toQueueUrl && toQueueUrl.match(videoPageRe))
-            c.queue(toQueueUrl);
+            if(toQueueUrl && toQueueUrl.match(videoPageRe)){
+              c.queue(toQueueUrl);
+            }
+
         });
         const from = _.get(result, 'request.response.uri');
         if (from && from.match(videoPageRe)) {
           getVideoInfo($, from);
         }
+        let urls = getAllHref($('#waterfall').html()).concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`));
+        urls = _.uniq(urls);
+        urls.forEach(url => c.queue(url));
+        // waterfall
+        // c.queue()
+        // pagination
+        // c.queue()
     }
 });
 
@@ -52,7 +61,7 @@ function start(baseUrl) {
       }
     }
   })
-  c.queue(baseUrl);
+  // c.queue(baseUrl);
 }
 start(baseUrl)
 // Queue just one URL, with default callback
@@ -131,6 +140,7 @@ function getVideoInfo($, from) {
 
     })
     const allUrls = getAllHref($('.info').html())
+    c.queue(allUrls)
     allUrls.forEach(url => {
       if(url.indexOf('director') > 0) {
         video.director.key = url.split('/')[url.split('/').length-1].trim();
