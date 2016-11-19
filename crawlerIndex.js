@@ -140,7 +140,7 @@ function getVideoInfo($, from) {
 
     })
     const allUrls = getAllHref($('.info').html())
-    c.queue(allUrls)
+    allUrls.forEach(url => c.queue(url));
     allUrls.forEach(url => {
       if(url.indexOf('director') > 0) {
         video.director.key = url.split('/')[url.split('/').length-1].trim();
