@@ -5,6 +5,7 @@ var request = require('sync-request');
 let VideoModel = require('./model');
 
 global.count = 0;
+global.oldUrl = [];
 const baseUrl = 'https://www.javbus.com';
 
 let conn = mongoose.connect('mongodb://localhost/jav1');
@@ -27,7 +28,7 @@ var c = new Crawler({
         $('a').each(function(index, a) {
             var toQueueUrl = $(a).attr('href');
             if(toQueueUrl && toQueueUrl.match(videoPageRe)){
-              c.queue(toQueueUrl);
+              // c.queue(toQueueUrl);
             }
 
         });
@@ -37,7 +38,12 @@ var c = new Crawler({
         }
         let urls = getAllHref($('#waterfall').html()).concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`));
         urls = _.uniq(urls);
-        urls.forEach(url => c.queue(url));
+        urls.forEach(url => {
+          if(!(url in global.oldUrl)) {
+            c.queue(url)
+            global.oldUrl.push(url)
+          }
+        });
         // waterfall
         // c.queue()
         // pagination
@@ -140,7 +146,7 @@ function getVideoInfo($, from) {
 
     })
     const allUrls = getAllHref($('.info').html())
-    allUrls.forEach(url => c.queue(url));
+    // allUrls.forEach(url => c.queue(url));
     allUrls.forEach(url => {
       if(url.indexOf('director') > 0) {
         video.director.key = url.split('/')[url.split('/').length-1].trim();
