@@ -32,23 +32,29 @@ var c = new Crawler({
         //     }
         //
         // });
-        const from = _.get(result, 'request.response.uri');
-        if (from && from.match(videoPageRe)) {
-          getVideoInfo($, from);
-        }
-        let urls = getAllHref($('#waterfall').html()).concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`));
+        // console.log($('#waterfall').html())
+        let urls = getAllHref($('#waterfall').html())
+        .concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`))
+        .concat(getAllHref($('.info').html()));
         urls = _.uniq(urls);
         urls.forEach(url => {
-          if(!(url in global.oldUrl) && (url.indexOf('studio') !== -1 || url.indexOf('star') !== -1)) {
+          if(global.oldUrl.indexOf(url) === -1
+            && url.indexOf('genre') === -1
+            && url.indexOf('label') === -1
+            && url.indexOf('series') === -1) {
+            console.log(global.oldUrl.indexOf('url'))
+            console.log(global.oldUrl)
             c.queue(url)
             console.log('queue ' + url)
             global.oldUrl.push(url)
           }
         });
-        // waterfall
-        // c.queue()
-        // pagination
-        // c.queue()
+        const from = _.get(result, 'request.response.uri');
+        if (from && from.match(videoPageRe)) {
+          getVideoInfo($, from);
+        }
+        // console.log($('#waterfall').html())
+
     }
 });
 
