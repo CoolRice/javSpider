@@ -39,8 +39,9 @@ var c = new Crawler({
         let urls = getAllHref($('#waterfall').html()).concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`));
         urls = _.uniq(urls);
         urls.forEach(url => {
-          if(!(url in global.oldUrl)) {
+          if(!(url in global.oldUrl) && (url.indexOf('studio') !== -1 || url.indexOf('star') !== -1)) {
             c.queue(url)
+            console.log('queue ' + url)
             global.oldUrl.push(url)
           }
         });
@@ -224,7 +225,14 @@ function getItemMagnet($, video, done) {
         'Cookie': 'existmag=all'
       }
     });
-    const body = (res && res.getBody()) || '';
+    let body = '';
+    try {
+      body = (res && res.getBody()) || '';
+    }
+    catch(e) {
+      body = '';
+    }
+
     if(body.indexOf('暫時沒有磁力連結') === -1) {
       try{
         let $body = $.load(res.getBody());
