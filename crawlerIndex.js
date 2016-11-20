@@ -6,7 +6,7 @@ let VideoModel = require('./model');
 
 global.count = 0;
 global.oldUrl = [];
-const baseUrl = 'https://www.javbus5.com';
+const baseUrl = 'https://www.javbus.com';
 
 let conn = mongoose.connect('mongodb://localhost/jav1');
 
