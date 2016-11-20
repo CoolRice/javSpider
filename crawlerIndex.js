@@ -42,10 +42,10 @@ var c = new Crawler({
             && url.indexOf('genre') === -1
             && url.indexOf('label') === -1
             && url.indexOf('series') === -1) {
-            console.log(global.oldUrl.indexOf('url'))
-            console.log(global.oldUrl)
+            // console.log(global.oldUrl.indexOf('url'))
+            // console.log(global.oldUrl)
             c.queue(url)
-            console.log('queue ' + url)
+            // console.log('queue ' + url)
             global.oldUrl.push(url)
           }
         });
@@ -59,22 +59,19 @@ var c = new Crawler({
 });
 
 function start(baseUrl) {
-  // VideoModel.count({}, (err, res) => {
-  //   console.log(`total count ${res}.`)
-  //   global.count = res;
-  //   if(params && params[0]) {
-  //     c.queue(`${baseUrl}/${params[0]}`);
-  //   }
-  //   else {
-  //     if(res && res > 0) {
-  //       VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
-  //         console.log(`latest saved movie is ${res.code}`);
-  //         c.queue(baseUrl + '/' + res.code.trim());
-  //       })
-  //     }
-  //   }
-  // })
-  c.queue(baseUrl);
+  VideoModel.count({}, (err, res) => {
+    console.log(`total count ${res}.`)
+    global.count = res;
+      if(res && res > 0) {
+        VideoModel.findOne().sort({ _id: -1}).limit(1).exec((err, res) => {
+          console.log(`latest saved movie is ${res.code}`);
+          c.queue(baseUrl + '/' + res.code.trim());
+        })
+      }
+      else {
+        c.queue(baseUrl)
+      }
+  })
 }
 start(baseUrl)
 // Queue just one URL, with default callback
