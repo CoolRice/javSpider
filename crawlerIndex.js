@@ -6,7 +6,7 @@ let VideoModel = require('./model');
 
 global.count = 0;
 global.oldUrl = [];
-const baseUrl = 'https://www.javbus.com';
+const baseUrl = 'https://www.javbus5.com';
 
 let conn = mongoose.connect('mongodb://localhost/jav1');
 
@@ -23,37 +23,41 @@ var c = new Crawler({
     },
     // This will be called for each crawled page
     callback : function (error, result, $) {
-        // $ is Cheerio by default
-        //a lean implementation of core jQuery designed specifically for the server
-        // $('a').each(function(index, a) {
-        //     var toQueueUrl = $(a).attr('href');
-        //     if(toQueueUrl && toQueueUrl.match(videoPageRe)){
-        //       // c.queue(toQueueUrl);
-        //     }
-        //
-        // });
-        // console.log($('#waterfall').html())
-        let urls = getAllHref($('#waterfall').html())
-        .concat(getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`))
-        .concat(getAllHref($('.info').html()));
-        urls = _.uniq(urls);
-        urls.forEach(url => {
-          if(global.oldUrl.indexOf(url) === -1
-            && url.indexOf('genre') === -1
-            && url.indexOf('label') === -1
-            && url.indexOf('series') === -1) {
-            // console.log(global.oldUrl.indexOf('url'))
-            // console.log(global.oldUrl)
-            c.queue(url)
-            // console.log('queue ' + url)
-            global.oldUrl.push(url)
-          }
+      // current page
+      const from = _.get(result, 'request.response.uri', '');
+      if (from && from.match(videoPageRe)) {
+        getVideoInfo($, from);
+      }
+
+      // push urls to queue
+      try {
+        let videoUrls = getAllHref($('#waterfall').html());
+        videoUrls.forEach(url => {
+          VideoModel.findOne({from: url.trim()}, (error, video) => {
+            if(!video) {
+              c.queue(url)
+            }
+          })
         });
-        const from = _.get(result, 'request.response.uri');
-        if (from && from.match(videoPageRe)) {
-          getVideoInfo($, from);
+      }
+      catch(e) {
+        console.log(e)
+      }
+
+
+      let listUrls = getAllHref($('.pagination').html()).map(item => `${baseUrl}${item}`)
+        .concat(getAllHref($('.info').html()));
+      listUrls = _.uniq(listUrls);
+      listUrls.forEach(url => {
+        if(global.oldUrl.indexOf(url) === -1
+          && url.indexOf('genre') === -1
+          && url.indexOf('label') === -1
+          && url.indexOf('series') === -1) {
+          c.queue(url)
+          global.oldUrl.push(url)
         }
-        // console.log($('#waterfall').html())
+      });
+
 
     }
 });
