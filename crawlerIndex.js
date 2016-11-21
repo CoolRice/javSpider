@@ -235,14 +235,7 @@ function getItemMagnet($, video, done) {
       }
     });
     body = (res && res.getBody()) || '';
-  }
-  catch(e) {
-    body = '';
-    console.log(e)
-  }
-
-  if(body.indexOf('暫時沒有磁力連結') === -1) {
-    try{
+    if(body.indexOf('暫時沒有磁力連結') === -1) {
       let $body = $.load(res.getBody());
       // 将磁链单独存入
       const magnet_links = [];
@@ -258,12 +251,11 @@ function getItemMagnet($, video, done) {
       })
       video.magnet_links = magnet_links;
     }
-    catch(e) {
-      console.log(video.code)
-      console.log(e)
-    }
   }
-
+  catch(e) {
+    body = '';
+    console.log(e)
+  }
   done(video)
 }
 
