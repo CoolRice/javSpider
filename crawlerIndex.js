@@ -226,43 +226,43 @@ function getItemMagnet($, video, done) {
   const meta = getMetaInfo($);
   const url = baseUrl + '/ajax/uncledatoolsbyajax.php?gid=' + meta.gid + '&lang=' + meta.lang + '&img=' + meta.img + '&uc=' + meta.uc + '&floor=' + Math.floor(Math.random() * 1e3 + 1);
 
+  let body = '';
+  try {
     var res = request('GET', url, {
       'headers': {
         'Referer': 'http://www.javbus.com',
         'Cookie': 'existmag=all'
       }
     });
-    let body = '';
-    try {
-      body = (res && res.getBody()) || '';
+    body = (res && res.getBody()) || '';
+  }
+  catch(e) {
+    body = '';
+    console.log(e)
+  }
+
+  if(body.indexOf('暫時沒有磁力連結') === -1) {
+    try{
+      let $body = $.load(res.getBody());
+      // 将磁链单独存入
+      const magnet_links = [];
+      $body('tr').each((index, row) => {
+        if ($(row).children().eq(0).children().attr('href')) {
+          magnet_links.push({
+            name: $(row).children().eq(0).text(),
+            size: $(row).children().eq(1).text(),
+            share_time: $(row).children().eq(2).text(),
+            link: $(row).children().eq(0).children().attr('href')
+          });
+        }
+      })
+      video.magnet_links = magnet_links;
     }
     catch(e) {
-      body = '';
+      console.log(video.code)
+      console.log(e)
     }
-
-    if(body.indexOf('暫時沒有磁力連結') === -1) {
-      try{
-        let $body = $.load(res.getBody());
-        // 将磁链单独存入
-        const magnet_links = [];
-        $body('tr').each((index, row) => {
-          if ($(row).children().eq(0).children().attr('href')) {
-            magnet_links.push({
-              name: $(row).children().eq(0).text(),
-              size: $(row).children().eq(1).text(),
-              share_time: $(row).children().eq(2).text(),
-              link: $(row).children().eq(0).children().attr('href')
-            });
-          }
-        })
-        video.magnet_links = magnet_links;
-      }
-      catch(e) {
-        console.log(video.code)
-        console.log(e)
-        console.log(body.toString())
-      }
-    }
+  }
 
   done(video)
 }
